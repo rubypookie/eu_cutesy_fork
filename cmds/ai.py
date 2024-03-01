@@ -2,6 +2,7 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from features.ai_chat import Infer
+from features.database import Database
 
 class AICommands(commands.Cog):
     def __init__(self, bot):
@@ -9,24 +10,26 @@ class AICommands(commands.Cog):
         self.infer = Infer()
         self.user_dict = {}
 
-    @app_commands.command()
-    async def chat(self, interaction: discord.Interaction):
-        await interaction.response.send_message('Chatting...')
+    ### Deprecated
+        
+    # @app_commands.command()
+    # async def chat(self, interaction: discord.Interaction):
+    #     await interaction.response.send_message('Chatting...')
 
-    @commands.command(name='chat')
-    async def chat_legacy(self, ctx, *, prompt: str):
-        if ctx.author.id not in self.user_dict:
-            self.user_dict[ctx.author.id] = self.infer.create()
+    # @commands.command(name='chat')
+    # async def chat_legacy(self, ctx, *, prompt: str):
+    #     if ctx.author.id not in self.user_dict:
+    #         self.user_dict[ctx.author.id] = self.infer.create()
 
-        agent = self.user_dict[ctx.author.id]
-        response = self.infer.chat(agent, prompt.strip())
+    #     agent = self.user_dict[ctx.author.id]
+    #     response = self.infer.chat(agent, prompt.strip())
 
-        for r in response:
-            if 'internal_monologue' in r and r['internal_monologue']:
-                await ctx.send("> " + r['internal_monologue'])
+    #     for r in response:
+    #         if 'internal_monologue' in r and r['internal_monologue']:
+    #             await ctx.send("> " + r['internal_monologue'])
 
-            if 'assistant_message' in r and r['assistant_message']:
-                await ctx.reply(r['assistant_message'], mention_author=False)
+    #         if 'assistant_message' in r and r['assistant_message']:
+    #             await ctx.reply(r['assistant_message'], mention_author=False)
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -37,10 +40,10 @@ class AICommands(commands.Cog):
             return
 
         if message.author.id not in self.user_dict:
-            self.user_dict[message.author.id] = self.infer.create()
+            self.user_dict[message.author.id] = self.infer.create_agent()
 
         agent = self.user_dict[message.author.id]
-        response = self.infer.chat(agent, message.content.strip())
+        response = self.infer.get_chat_response(agent, message.content.strip())
 
         for r in response:
             if 'internal_monologue' in r and r['internal_monologue']:

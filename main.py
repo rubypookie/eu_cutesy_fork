@@ -25,4 +25,4 @@ async def sync(ctx):
             bot.load_extension(f'cmds.{f[:-3]}')
             await ctx.send(f'Loaded {f[:-3]}')
 
-bot.run('MTIxMjg5NzIxMjc2NjM1OTY1Mg.GHyttZ.VcnGHNpGJU5cBYdht6yTiHiqwAT3Z5tcDFqhw0')
+bot.run('TOKEN')
