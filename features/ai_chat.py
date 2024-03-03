@@ -29,19 +29,19 @@ class Infer:
         chat_thread.join()  # Wait for the thread to complete
         return self.response
 
-    def create_agent_callback(self):
+    def create_agent_callback(self, persona: str):
         """
         Target function for the thread handling agent creation.
         """
-        agent = self.instance.create_agent(agent_config={})
+        agent = self.instance.create_agent(agent_config={"persona": persona})
         with self.lock:
             self.agent = agent
 
-    def create_agent(self):
+    def create_agent(self, persona: str = "sam_pov"):
         """
         Initiates a thread to create an agent.
         """
-        create_thread = threading.Thread(target=self.create_agent_callback)
+        create_thread = threading.Thread(target=self.create_agent_callback, args=(persona,))
         create_thread.start()
         create_thread.join()  # Wait for the thread to complete
         return self.agent.id
