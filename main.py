@@ -12,6 +12,8 @@ async def on_ready():
     for f in os.listdir('cmds'):
         if f.endswith('.py'):
             await bot.load_extension(f'cmds.{f[:-3]}')
+    tree = await bot.tree.sync()
+    print(len(tree))
 
 @bot.command()
 async def ping(ctx):

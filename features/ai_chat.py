@@ -1,6 +1,7 @@
 # AI chat inference code
 
 import memgpt
+import uuid
 import threading
 from memgpt.client.client import Client as MemGPT
 
@@ -15,7 +16,7 @@ class Infer:
         """
         Target function for the thread handling chat responses.
         """
-        response = self.instance.user_message(agent.id, message)
+        response = self.instance.user_message(agent, message)
         with self.lock:
             self.response = response
 
@@ -43,4 +44,4 @@ class Infer:
         create_thread = threading.Thread(target=self.create_agent_callback)
         create_thread.start()
         create_thread.join()  # Wait for the thread to complete
-        return self.agent
+        return self.agent.id

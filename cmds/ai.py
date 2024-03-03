@@ -2,13 +2,14 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 from features.ai_chat import Infer
-from features.database import Database
+from features.database import AgentDatabase
+import uuid
 
 class AICommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.infer = Infer()
-        self.user_dict = {}
+        self.db = AgentDatabase()
 
     ### Deprecated
         
@@ -30,6 +31,13 @@ class AICommands(commands.Cog):
 
     #         if 'assistant_message' in r and r['assistant_message']:
     #             await ctx.reply(r['assistant_message'], mention_author=False)
+        
+    @app_commands.command()
+    async def reset(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        await interaction.edit_original_response(content='Resetting...')
+        self.db.delete_user_data(interaction.user.id)
+        await interaction.edit_original_response(content='Reset complete.')
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -39,11 +47,14 @@ class AICommands(commands.Cog):
         if message.channel.id != 1212897673104072734: # move this to .env
             return
 
-        if message.author.id not in self.user_dict:
-            self.user_dict[message.author.id] = self.infer.create_agent()
+        data = self.db.get_user_data(message.author.id)
+        if not data:
+            agent_id = self.infer.create_agent()
+            self.db.set_user_data(message.author.id, str(agent_id))
+            data = self.db.get_user_data(message.author.id)
 
-        agent = self.user_dict[message.author.id]
-        response = self.infer.get_chat_response(agent, message.content.strip())
+        agent = data[1]
+        response = self.infer.get_chat_response(uuid.UUID(agent), message.content.strip())
 
         for r in response:
             if 'internal_monologue' in r and r['internal_monologue']:
