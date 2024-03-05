@@ -13,7 +13,7 @@ class AICommands(commands.Cog):
 
         self.personas = [
                     discord.SelectOption(label="Sam POV", value="sam_pov"),
-                    discord.SelectOption(label="Lily", value="lily_pov"),
+                    discord.SelectOption(label="Lily POV", value="lily_pov"),
                 ]
                                                         
     def get_ratelimit(self, message: discord.Message):
@@ -74,7 +74,7 @@ class AICommands(commands.Cog):
                 
             persona_options = discord.ui.Select(options=self.personas)
             persona_options.callback = persona_callback
-            view = discord.ui.View()
+            view = discord.ui.View(timeout=None)
             view.add_item(persona_options)
             await message.channel.send("Select your persona.", view=view)
         else:
