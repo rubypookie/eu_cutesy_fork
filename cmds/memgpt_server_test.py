@@ -21,6 +21,7 @@ class MemGPTServer(commands.Cog):
         self.api_url = 'http://localhost:8283/'
         self.bearer = None
         self.uuid = None
+        self.admin = None
 
     @app_commands.command(description="ONLY FOR DEVELOPER USE.")
     async def authenticate(self, interaction: discord.Interaction):
@@ -41,8 +42,14 @@ class MemGPTServer(commands.Cog):
         }
 
         response = requests.post(URI, json=payload, headers=headers)
-        self.bearer = response.json()['uuid']
-
+        print(response.text)
+        if 'Incorrect credentials' in response.text:
+            await authenticate_modal.on_submit_interaction.response.send_message(f"*Incorrect credentials. Please try again.*", ephemeral=True)
+            return
+        
+        self.bearer = authenticate_modal.am_title.value
+        self.admin = interaction.user.id
+        self.uuid = str(response.json()['uuid'])
         await authenticate_modal.on_submit_interaction.response.send_message(f"*Successfully authenticated: {self.bearer}*", ephemeral=True)
 
     @app_commands.command()
@@ -50,6 +57,10 @@ class MemGPTServer(commands.Cog):
         """
         Get all users from the database. Uses threading to improve multiple user handling.
         """
+        if interaction.user.id != self.admin:
+            await interaction.response.send_message('You are not authorized to use this command.', ephemeral=True)
+            return
+        
         await interaction.response.send_message('Getting users...', ephemeral=True)
 
         URI = self.api_url + 'admin/users'
@@ -63,10 +74,14 @@ class MemGPTServer(commands.Cog):
         print(response.text)
 
     @app_commands.command()
-    async def createuser(self, interaction: discord.Interaction, username: str = None):
+    async def createuser(self, interaction: discord.Interaction):
+        if interaction.user.id != self.admin:
+            await interaction.response.send_message('You are not authorized to use this command.', ephemeral=True)
+            return
+
         URI = self.api_url + 'admin/users'
-        
-        payload = { "user_id": username } if username else None
+
+        payload = { "user_id": self.uuid }
         headers = {
             "accept": "application/json",
             "content-type": "application/json",
