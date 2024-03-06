@@ -12,6 +12,7 @@ Current methods:
 """
 
 import sqlite3
+import os
 
 class AgentDatabase:
     def __init__(self):
@@ -24,6 +25,9 @@ class AgentDatabase:
             )
         ''')
         self.conn.commit()
+
+        if not os.path.exists('database'):
+            os.makedirs('database')
 
     def get_user_data(self, user_id):
         self.cursor.execute('SELECT * FROM agent_user_data WHERE user_id=?', (user_id,))

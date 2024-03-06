@@ -15,7 +15,7 @@ class AICommands(commands.Cog):
                     discord.SelectOption(label="Sam POV", value="sam_pov"),
                     discord.SelectOption(label="Lily POV", value="lily_pov"),
                 ]
-                                                        
+
     def get_ratelimit(self, message: discord.Message):
         """Returns the ratelimit left"""
         bucket = self._cd.get_bucket(message)
@@ -45,12 +45,12 @@ class AICommands(commands.Cog):
         await interaction.edit_original_response(content='Reset complete.')
 
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
         await self.bot.process_commands(message)
         if message.author.bot:
             return
         
-        if message.channel.id != 1212897673104072734: # move this to .env
+        if message.channel.id != 1214710328223338548: # move this to .env
             return
         
         ratelimit = self.get_ratelimit(message)
