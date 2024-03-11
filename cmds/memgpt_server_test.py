@@ -5,12 +5,6 @@ MemGPT server test commands. Must run `memgpt server` command prior to using the
 import discord
 from discord import app_commands
 from discord.ext import commands
-from features.ai_chat import Infer
-from features.database import AgentDatabase
-import uuid
-import threading
-import asyncio
-import threading
 import requests
 
 from features.memgpt_authenticate_modal import AuthModal

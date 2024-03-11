@@ -16,11 +16,11 @@ async def on_ready():
     print(len(tree))
 
 @bot.command()
-async def ping(ctx):
+async def ping(ctx: commands.Context):
     await ctx.send('Pong!')
 
 @bot.command()
-async def sync(ctx):
+async def sync(ctx: commands.Context):
     await ctx.send('Syncing...')
     for f in os.listdir('cmds'):
         if f.endswith('.py'):

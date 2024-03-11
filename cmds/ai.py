@@ -5,16 +5,16 @@ from features.ai_chat import Infer
 from features.database import AgentDatabase
 
 class AICommands(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.infer = Infer()
         self.db = AgentDatabase()
-        self._cd = commands.CooldownMapping.from_cooldown(1, 10, commands.BucketType.member)
+        self._cd = commands.CooldownMapping.from_cooldown(1, 15, commands.BucketType.member)
 
         self.personas = [
-                    discord.SelectOption(label="Sam POV", value="sam_pov"),
-                    discord.SelectOption(label="Lily POV", value="lily_pov"),
-                ]
+            discord.SelectOption(label="Sam POV", value="sam_pov"),
+            discord.SelectOption(label="Lily POV", value="lily_pov"),
+        ]
 
     def get_ratelimit(self, message: discord.Message):
         """Returns the ratelimit left"""
@@ -40,7 +40,7 @@ class AICommands(commands.Cog):
     async def reset(self, interaction: discord.Interaction):
         await interaction.response.defer()
         await interaction.edit_original_response(content='Resetting...')
-        # self.infer.delete_agent(self.db.get_user_data(interaction.user.id)[1])
+
         self.db.delete_user_data(interaction.user.id)
         await interaction.edit_original_response(content='Reset complete.')
 
@@ -83,5 +83,5 @@ class AICommands(commands.Cog):
         self.infer.save_agent()
         await self.bot.process_commands(message)
 
-async def setup(bot):
+async def setup(bot: commands.Bot):
     await bot.add_cog(AICommands(bot))
