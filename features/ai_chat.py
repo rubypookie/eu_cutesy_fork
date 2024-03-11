@@ -2,6 +2,7 @@
 
 from memgpt import create_client
 import uuid
+from static.constants import HUMAN
 
 class Infer:
     def __init__(self):
@@ -16,11 +17,11 @@ class Infer:
         print(response)
         return response
 
-    def create_agent(self, persona: str = "sam_pov"):
+    def create_agent(self, persona):
         """
         Initiates a thread to create an agent.
         """
-        agent = self.client.create_agent(persona=persona, human="cs_phd")
+        agent = self.client.create_agent(persona=persona, human=HUMAN)
         print(agent.id)
         return agent.id
     

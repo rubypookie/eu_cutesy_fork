@@ -3,17 +3,19 @@ from discord import app_commands
 from discord.ext import commands
 from features.ai_chat import Infer
 from features.database import AgentDatabase
+from persona.fetch_persona import Persona
+from persona.persona_modal import PersonaModal
 
 class AICommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.infer = Infer()
+        self.agent_persona = Persona()
         self.db = AgentDatabase()
         self._cd = commands.CooldownMapping.from_cooldown(1, 15, commands.BucketType.member)
 
         self.personas = [
-            discord.SelectOption(label="Sam POV", value="sam_pov"),
-            discord.SelectOption(label="Lily POV", value="lily_pov"),
+            discord.SelectOption(label=persona_name, value=persona_name) for persona_name in self.agent_persona.get_persona_list()
         ]
 
     def get_ratelimit(self, message: discord.Message):
@@ -33,9 +35,42 @@ class AICommands(commands.Cog):
     
     @app_commands.command()
     @commands.has_permissions(administrator=True)
-    async def persona(self, interaction: discord.Interaction):
-        pass
-        
+    async def addpersona(self, interaction: discord.Interaction, name: str):
+        persona_modal = PersonaModal()
+        await interaction.response.send_modal(persona_modal)
+        await persona_modal.wait()
+
+        persona = persona_modal.persona.value
+        if self.agent_persona.add_persona(name, persona):
+            await persona_modal.on_submit_interaction.response.send_message(f"Added persona: {name}.")
+        else:
+            await persona_modal.on_submit_interaction.response.send_message("Persona already exists.")
+
+    @app_commands.command()
+    @commands.has_permissions(administrator=True)
+    async def delpersona(self, interaction: discord.Interaction, name: str):
+        if self.agent_persona.delete_persona(name):
+            await interaction.response.send_message(f"Deleted persona: {name}.")
+        else:
+            await interaction.response.send_message("Persona does not exist.")
+
+    @app_commands.command()
+    async def personas(self, interaction: discord.Interaction):
+        async def persona_callback(interaction: discord.Interaction):
+            if interaction.user.id != interaction.user.id:
+                return await interaction.response.send_message(content='You cannot interact with this select menu.', ephemeral=True)
+            await interaction.response.send_message(content='Fetching description...', ephemeral=True)
+            persona = interaction.data['values'][0]
+
+            persona = self.agent_persona.get_persona(persona)
+            await interaction.edit_original_response(content=persona)
+            
+        persona_options = discord.ui.Select(options=self.personas)
+        persona_options.callback = persona_callback
+        view = discord.ui.View(timeout=None)
+        view.add_item(persona_options)
+        await interaction.response.send_message("Select the persona you wish to view.", view=view)
+
     @app_commands.command()
     async def reset(self, interaction: discord.Interaction):
         await interaction.response.defer()
@@ -65,6 +100,9 @@ class AICommands(commands.Cog):
                     return await interaction.response.send_message(content='You cannot interact with this select menu.', ephemeral=True)
                 await interaction.response.send_message(content='Creating agent...', ephemeral=True)
                 persona = interaction.data['values'][0]
+
+                persona = self.agent_persona.get_persona(persona)
+
                 agent_id = self.infer.create_agent(persona=persona)
                 self.db.set_user_data(message.author.id, str(agent_id))
 
@@ -76,7 +114,7 @@ class AICommands(commands.Cog):
             persona_options.callback = persona_callback
             view = discord.ui.View(timeout=None)
             view.add_item(persona_options)
-            await message.channel.send("Select your persona.", view=view)
+            await message.channel.send(f"{message.author.mention}, select your persona.", view=view)
         else:
             await self.generate_response(message)
 
