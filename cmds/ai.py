@@ -5,6 +5,7 @@ from features.ai_chat import Infer
 from features.database import AgentDatabase
 from persona.fetch_persona import Persona
 from persona.persona_modal import PersonaModal
+from static.constants import DESCRIPTION
 
 class AICommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -29,10 +30,24 @@ class AICommands(commands.Cog):
         response = self.infer.get_chat_response(agent, message.content.strip())
         for r in response:
             if 'internal_monologue' in r and r['internal_monologue']:
-                await message.channel.send("> " + r['internal_monologue'])
+                await message.channel.send("> *" + r['internal_monologue'].replace("@everyone", "[EVERYONE]") + "*")
             if 'assistant_message' in r and r['assistant_message']:
-                await message.reply(r['assistant_message'], mention_author=False)
+                await message.reply("***" + r['assistant_message'].replace("@everyone", "[EVERYONE]") + "***", mention_author=False)
     
+    @app_commands.command()
+    async def info(self, interaction: discord.Interaction):
+        embed = discord.Embed(
+            title="Information!",
+            description=DESCRIPTION,
+            color=discord.Color.blurple()
+        )
+        # embed.set_thumbnail(url=self.bot.user.avatar)
+        embed.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar)
+        ### Add future banner here
+        # embed.set_image
+
+        await interaction.response.send_message(embed=embed)
+
     @app_commands.command()
     @commands.has_permissions(administrator=True)
     async def addpersona(self, interaction: discord.Interaction, name: str):
