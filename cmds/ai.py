@@ -91,7 +91,11 @@ class AICommands(commands.Cog):
         persona = persona_modal.persona.value
         if self.agent_persona.add_persona(name, persona):
             self.agent_db.set_agent_data(name, str(pfp))
-            self.persona_list.append(discord.SelectOption(label=name, value=name))
+            
+            self.persona_list = [
+                discord.SelectOption(label=persona_name, value=persona_name) for persona_name in self.agent_persona.get_persona_list()
+            ]
+            
             await persona_modal.on_submit_interaction.response.send_message(f"*added persona!: **{name}**~")
         else:
             await persona_modal.on_submit_interaction.response.send_message("*dummy.. this persona already exists!~*")
