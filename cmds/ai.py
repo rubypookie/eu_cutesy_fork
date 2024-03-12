@@ -6,7 +6,6 @@ from features.database import UserDatabase, AgentDatabase
 from persona.fetch_persona import Persona
 from persona.persona_modal import PersonaModal
 from static.constants import DESCRIPTION
-from PIL import Image
 
 class AICommands(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -20,6 +19,12 @@ class AICommands(commands.Cog):
         self.persona_list = [
             discord.SelectOption(label=persona_name, value=persona_name) for persona_name in self.agent_persona.get_persona_list()
         ]
+
+        self.delete_redundant_persona()
+
+    def delete_redundant_persona(self):
+        for persona in self.agent_persona.get_redundant_persona_list():
+            self.agent_persona.delete_persona(persona)
 
     def get_ratelimit(self, message: discord.Message):
         """Returns the ratelimit left"""

@@ -1,9 +1,10 @@
 import os
 import discord
+from features.database import AgentDatabase
 
 class Persona:
     def __init__(self):
-        pass
+        self.agent_db = AgentDatabase()
 
     def get_persona(self, persona: str):
         file_path = os.path.join(os.path.dirname(__file__), f"contents/{persona}.txt")
@@ -27,8 +28,11 @@ class Persona:
         return False
     
     def get_persona_list(self):
-        return [file[:-4] for file in os.listdir(os.path.dirname(__file__) + "/contents/") if file.endswith(".txt")]
+        return [file[:-4] for file in os.listdir(os.path.dirname(__file__) + "/contents/") if file.endswith(".txt") and self.agent_db.get_agent_data(file[:-4])]
     
+    def get_redundant_persona_list(self):
+        return [file[:-4] for file in os.listdir(os.path.dirname(__file__) + "/contents/") if file.endswith(".txt") and self.agent_db.get_agent_data(file[:-4]) is None]
+
     # Redundant method????
     # def get_persona_contents(self, name: str):
     #     file_path = os.path.join(os.path.dirname(__file__), f"contents/{name}.txt")
