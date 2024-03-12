@@ -189,11 +189,12 @@ class AICommands(commands.Cog):
 
                 await self.generate_response(message)
                 
-            persona_options = discord.ui.Select(options=self.persona_list)
-            persona_options.callback = persona_callback
-            view = discord.ui.View(timeout=None)
-            view.add_item(persona_options)
-            await message.channel.send(f"{message.author.mention}, select your persona.", view=view)
+            if len(self.persona_list) > 0:
+                persona_options = discord.ui.Select(options=self.persona_list)
+                persona_options.callback = persona_callback
+                view = discord.ui.View(timeout=None)
+                view.add_item(persona_options)
+                await message.channel.send(f"{message.author.mention}, select your persona.", view=view)
         else:
             await self.generate_response(message)
 
