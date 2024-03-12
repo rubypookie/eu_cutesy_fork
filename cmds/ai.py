@@ -14,7 +14,7 @@ class AICommands(commands.Cog):
         self.agent_persona = Persona()
         self.agent_db = AgentDatabase()
         self.db = UserDatabase()
-        self._cd = commands.CooldownMapping.from_cooldown(1, 15, commands.BucketType.member)
+        self._cd = commands.CooldownMapping.from_cooldown(1, 5, commands.BucketType.member)
 
         self.persona_list = [
             discord.SelectOption(label=persona_name, value=persona_name) for persona_name in self.agent_persona.get_persona_list()
@@ -57,11 +57,11 @@ class AICommands(commands.Cog):
         webhooks = await message.channel.webhooks()
         
         for webhook in webhooks:
-            if webhook.name == "AI Chat":
+            if webhook.name == "*AI Chat~*":
                 await send_msg(response, persona)
                 return
             
-        webhook = await message.channel.create_webhook(name="AI Chat")
+        webhook = await message.channel.create_webhook(name="*AI Chat~*")
         await send_msg(response, persona)
         return
     
@@ -92,9 +92,9 @@ class AICommands(commands.Cog):
         if self.agent_persona.add_persona(name, persona):
             self.agent_db.set_agent_data(name, str(pfp))
             self.persona_list.append(discord.SelectOption(label=name, value=name))
-            await persona_modal.on_submit_interaction.response.send_message(f"Added persona: **{name}**.")
+            await persona_modal.on_submit_interaction.response.send_message(f"*added persona!: **{name}**~")
         else:
-            await persona_modal.on_submit_interaction.response.send_message("Persona already exists.")
+            await persona_modal.on_submit_interaction.response.send_message("*dummy.. this persona already exists!~*")
 
     @app_commands.command()
     @commands.has_permissions(administrator=True)
@@ -102,16 +102,16 @@ class AICommands(commands.Cog):
         if self.agent_persona.delete_persona(name):
             self.agent_db.delete_agent_data(name)
 
-            await interaction.response.send_message(f"Deleted persona: **{name}**.")
+            await interaction.response.send_message(f"*aw... deleted persona: **{name}**~")
         else:
-            await interaction.response.send_message("Persona does not exist.")
+            await interaction.response.send_message("*hmph.. persona does not exist!~*")
 
     @app_commands.command()
     async def personas(self, interaction: discord.Interaction):
         async def persona_callback(interaction: discord.Interaction):
             if interaction.user.id != interaction.user.id:
-                return await interaction.response.send_message(content='You cannot interact with this select menu.', ephemeral=True)
-            await interaction.response.send_message(content='Fetching description...', ephemeral=True)
+                return await interaction.response.send_message(content='*hey! you cannot interact with this select menu!~*', ephemeral=True)
+            await interaction.response.send_message(content='*fetching description...~*', ephemeral=True)
             persona_name = interaction.data['values'][0]
 
             persona = self.agent_persona.get_persona(persona_name)
@@ -128,15 +128,15 @@ class AICommands(commands.Cog):
         persona_options.callback = persona_callback
         view = discord.ui.View(timeout=None)
         view.add_item(persona_options)
-        await interaction.response.send_message("Select the persona you wish to view.", view=view)
+        await interaction.response.send_message("*select your ai persona!~*", view=view)
 
     @app_commands.command()
     async def reset(self, interaction: discord.Interaction):
         await interaction.response.defer()
-        await interaction.edit_original_response(content='Resetting...')
+        await interaction.edit_original_response(content='*resetting...~*')
 
         self.db.delete_user_data(interaction.user.id)
-        await interaction.edit_original_response(content='Reset complete.')
+        await interaction.edit_original_response(content='*reset complete!~*')
 
     # @app_commands.command()
     # async def test(self, interaction: discord.Interaction):
@@ -160,24 +160,24 @@ class AICommands(commands.Cog):
         if message.author.bot:
             return
         
-        if message.channel.id != 1214710328223338548: # move this to .env
+        if message.channel.id != 1217182413063458886: # move this to .env
             return
         
         ratelimit = self.get_ratelimit(message)
         if ratelimit:
-            await message.reply(f'You are being ratelimited. Please wait {ratelimit:.2f} seconds.', mention_author=False)
+            await message.reply(f'*slow down!!!~ >//< please wait {ratelimit:.2f} seconds~*', mention_author=False)
             return
         
         data = self.db.get_user_data(message.author.id)
         if not data:
             async def persona_callback(interaction: discord.Interaction):
                 if interaction.user.id != message.author.id:
-                    return await interaction.response.send_message(content='You cannot interact with this select menu.', ephemeral=True)
+                    return await interaction.response.send_message(content='*hey! you cannot interact with this select menu!~*', ephemeral=True)
                 
                 if self.db.get_user_data(message.author.id):
-                    return await interaction.response.send_message(content='You already have an agent.', ephemeral=True)
+                    return await interaction.response.send_message(content='*you already have an agent...~*', ephemeral=True)
                 
-                await interaction.response.send_message(content='Creating agent...', ephemeral=True)
+                await interaction.response.send_message(content='*creating your agent...~*', ephemeral=True)
                 persona_name = interaction.data['values'][0]
 
                 persona = self.agent_persona.get_persona(persona_name)
@@ -185,7 +185,7 @@ class AICommands(commands.Cog):
                 agent_id = self.infer.create_agent(persona=persona)
                 self.db.set_user_data(message.author.id, str(agent_id), str(persona_name))
 
-                await interaction.edit_original_response(content='Agent created.')
+                await interaction.edit_original_response(content='*agent created!~*')
 
                 await self.generate_response(message)
                 
@@ -194,7 +194,7 @@ class AICommands(commands.Cog):
                 persona_options.callback = persona_callback
                 view = discord.ui.View(timeout=None)
                 view.add_item(persona_options)
-                await message.channel.send(f"{message.author.mention}, select your persona.", view=view)
+                await message.channel.send(f"***{message.author.mention}, select your persona!~***", view=view)
         else:
             await self.generate_response(message)
 
