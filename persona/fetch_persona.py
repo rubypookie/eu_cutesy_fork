@@ -5,7 +5,10 @@ from features.database import AgentDatabase
 class Persona:
     def __init__(self):
         self.agent_db = AgentDatabase()
-
+        
+        if not os.path.exists('persona/contents'):
+            os.makedirs('persona/contents')
+    
     def get_persona(self, persona: str):
         file_path = os.path.join(os.path.dirname(__file__), f"contents/{persona}.txt")
         with open(file_path, "r") as file:
