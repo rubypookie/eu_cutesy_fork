@@ -106,6 +106,10 @@ class AICommands(commands.Cog):
         if self.agent_persona.delete_persona(name):
             self.agent_db.delete_agent_data(name)
 
+            self.persona_list = [
+                discord.SelectOption(label=persona_name, value=persona_name) for persona_name in self.agent_persona.get_persona_list()
+            ]
+
             await interaction.response.send_message(f"*aw... deleted persona: **{name}**~")
         else:
             await interaction.response.send_message("*hmph.. persona does not exist!~*")
