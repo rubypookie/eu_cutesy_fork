@@ -57,11 +57,11 @@ class AICommands(commands.Cog):
         webhooks = await message.channel.webhooks()
         
         for webhook in webhooks:
-            if webhook.name == "*AI Chat~*":
+            if webhook.name == "AI Chat":
                 await send_msg(response, persona)
                 return
             
-        webhook = await message.channel.create_webhook(name="*AI Chat~*")
+        webhook = await message.channel.create_webhook(name="AI Chat")
         await send_msg(response, persona)
         return
     
@@ -92,7 +92,7 @@ class AICommands(commands.Cog):
         if self.agent_persona.add_persona(name, persona):
             self.agent_db.set_agent_data(name, str(pfp))
             self.persona_list.append(discord.SelectOption(label=name, value=name))
-            await persona_modal.on_submit_interaction.response.send_message(f"*added persona!: **{name}**~")
+            await persona_modal.on_submit_interaction.response.send_message(f"*added persona!:* **{name}**~")
         else:
             await persona_modal.on_submit_interaction.response.send_message("*dummy.. this persona already exists!~*")
 
@@ -102,7 +102,7 @@ class AICommands(commands.Cog):
         if self.agent_persona.delete_persona(name):
             self.agent_db.delete_agent_data(name)
 
-            await interaction.response.send_message(f"*aw... deleted persona: **{name}**~")
+            await interaction.response.send_message(f"*aw... deleted persona:* **{name}**~")
         else:
             await interaction.response.send_message("*hmph.. persona does not exist!~*")
 
